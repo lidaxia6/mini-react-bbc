@@ -22,6 +22,7 @@ function updateContainer(element, container) {
 }
 
 function createRoot(container) {
+  debugger;
   const root = { containerInfo: container };
 
   return new ReactDOMRoot(root);

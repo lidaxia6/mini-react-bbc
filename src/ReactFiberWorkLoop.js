@@ -4,16 +4,16 @@ import {
   updateFunctionComponent,
   updateHostComponent,
   updateHostTextComponent,
-} from "./ReactFiberReconciler";
+} from './ReactFiberReconciler';
 import {
   ClassComponent,
   Fragment,
   FunctionComponent,
   HostComponent,
   HostText,
-} from "./ReactWorkTags";
-import { scheduleCallback } from "./scheduler";
-import { Placement, Update, updateNode } from "./utils";
+} from './ReactWorkTags';
+import { scheduleCallback } from './scheduler';
+import { Placement, Update, updateNode } from './utils';
 
 let wip = null; // work in progress 当前正在工作中的
 let wipRoot = null;
@@ -157,8 +157,10 @@ function getStateNode(fiber) {
 }
 
 function getHostSibling(sibling) {
+  // 如果有兄弟节点
   while (sibling) {
     if (sibling.stateNode && !(sibling.flags & Placement)) {
+      // 如果 存在 stateNode 且 flags 不是Placement(插入、新增、移动)，结束函数，返回当前节点的stateNode
       return sibling.stateNode;
     }
     sibling = sibling.sibling;
@@ -168,20 +170,22 @@ function getHostSibling(sibling) {
 
 function insertOrAppendPlacementNode(stateNode, before, parentNode) {
   if (before) {
-    parentNode.insertBefore(stateNode, before);
+    parentNode.insertBefore(stateNode, before); // 在指定节点之前插入；场景：在中间插入
   } else {
-    parentNode.appendChild(stateNode);
+    parentNode.appendChild(stateNode); // 添加为 parent 的最后一个子节点；
   }
 }
 
 function invokeHooks(wip) {
   const { updateQueueOfEffect, updateQueueOfLayout } = wip;
 
+  // useLayoutEffect 立即执行 `create()` 函数
   for (let i = 0; i < updateQueueOfLayout.length; i++) {
     const effect = updateQueueOfLayout[i];
     effect.create();
   }
 
+  // useEffect() 使用 `最小堆` 进行调度执行 `create()` 函数
   for (let i = 0; i < updateQueueOfEffect.length; i++) {
     const effect = updateQueueOfEffect[i];
 

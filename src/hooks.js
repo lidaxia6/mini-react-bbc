@@ -1,5 +1,5 @@
-import {scheduleUpdateOnFiber} from "./ReactFiberWorkLoop";
-import {areHookInputsEqual, HookLayout, HookPassive} from "./utils";
+import { scheduleUpdateOnFiber } from './ReactFiberWorkLoop';
+import { areHookInputsEqual, HookLayout, HookPassive } from './utils';
 
 let currentlyRenderingFiber = null;
 let workInProgressHook = null;
@@ -26,14 +26,22 @@ function updateWorkInProgressHook() {
     // 组件更新
     currentlyRenderingFiber.memorizedState = current.memorizedState;
     if (workInProgressHook) {
-      workInProgressHook = hook = workInProgressHook.next;
+      hook = workInProgressHook.next;
+      workInProgressHook = workInProgressHook.next;
+
       currentHook = currentHook.next;
-    } else {
+    }
+
+    if (!workInProgressHook) {
       // hook0
-      workInProgressHook = hook = currentlyRenderingFiber.memorizedState;
+      hook = currentlyRenderingFiber.memorizedState;
+      workInProgressHook = currentlyRenderingFiber.memorizedState;
+      
       currentHook = current.memorizedState;
     }
-  } else {
+  }
+
+  if (!current) {
     // 组件初次渲染
     currentHook = null;
 
@@ -43,7 +51,9 @@ function updateWorkInProgressHook() {
     };
     if (workInProgressHook) {
       workInProgressHook = workInProgressHook.next = hook;
-    } else {
+    }
+
+    if (!workInProgressHook) {
       // hook0
       workInProgressHook = currentlyRenderingFiber.memorizedState = hook;
     }
@@ -87,10 +97,10 @@ export function useReducer(reducer, initalState) {
 function dispatchReducerAction(fiber, hook, reducer, action) {
   hook.memorizedState = reducer
     ? reducer(hook.memorizedState, action)
-    : typeof action === "function"
+    : typeof action === 'function'
     ? action(hook.memorizedState)
     : action;
-  fiber.alternate = {...fiber};
+  fiber.alternate = { ...fiber };
   fiber.sibling = null;
   scheduleUpdateOnFiber(fiber);
 }
@@ -102,17 +112,19 @@ export function useState(initalState) {
 function updateEffectImp(hooksFlags, create, deps) {
   const hook = updateWorkInProgressHook();
 
+  // 如果屏幕上的hook存在，说明是`更新阶段`
   if (currentHook) {
     const prevEffect = currentHook.memorizedState;
     if (deps) {
       const prevDeps = prevEffect.deps;
+      // 比较前后 deps 是否相同
       if (areHookInputsEqual(deps, prevDeps)) {
         return;
       }
     }
   }
 
-  const effect = {hooksFlags, create, deps};
+  const effect = { hooksFlags, create, deps };
 
   hook.memorizedState = effect;
 
