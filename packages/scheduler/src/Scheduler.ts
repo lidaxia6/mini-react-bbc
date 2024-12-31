@@ -233,6 +233,7 @@ function workLoop(hasTimeRemaining: boolean, initialTime: number) {
   }
 }
 
+/** 是否将控制权交还给主线程 */
 function shouldYieldToHost() {
   const timeElapsed = getCurrentTime() - startTime;
 
